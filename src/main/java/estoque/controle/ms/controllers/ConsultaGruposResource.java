@@ -15,11 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import estoque.controle.ms.entity.FilhoDTO;
-import estoque.controle.ms.entity.GrupoDTO;
+import estoque.controle.ms.entity.FilhoVO;
 import estoque.controle.ms.entity.MemoriaDTO;
 import estoque.controle.ms.entity.MemoriaVO;
-import estoque.controle.ms.entity.emecGrupoMemoria;
 import estoque.controle.ms.entity.emecMemoriaCalculo;
 import estoque.controle.ms.repository.service.MemoriaCalculoService;
 
@@ -53,75 +51,68 @@ public class ConsultaGruposResource {
 		}
 	}
 	
-	@GetMapping(path = {"/mock/memoria/{cdMemoriaCalculo}"})
-	public ResponseEntity<MemoriaDTO> getMockMem(@PathVariable Integer cdMemoriaCalculo) {
+	/*
+	 * @GetMapping(path = {"/mock/memoria/{cdMemoriaCalculo}"}) public
+	 * ResponseEntity<MemoriaDTO> getMockMem(@PathVariable Integer cdMemoriaCalculo)
+	 * {
+	 * 
+	 * Long aux = 0L; List<FilhoVO> filhos = new ArrayList<FilhoVO>(); while (aux <=
+	 * 8) { aux ++; filhos.add(new FilhoVO(aux, "Grupo 0" + aux.toString(),
+	 * aux.intValue(), "GRUPO", null, null)); }
+	 * 
+	 * MemoriaDTO memoria = new MemoriaDTO(1L, 5400001L,
+	 * "Orcamento 5400 versao 001", filhos); return new
+	 * ResponseEntity<MemoriaDTO>(memoria, HttpStatus.OK);
+	 * 
+	 * }
+	 */
+	
+	/*
+	 * @GetMapping(path = {"/mock/grupo/{cdGrupoMemoria}"}) public
+	 * ResponseEntity<GrupoDTO> getMockGrupo(@PathVariable Integer cdGrupoMemoria) {
+	 * 
+	 * Long aux = 0L; List<FilhoVO> filhos = new ArrayList<FilhoVO>(); while (aux <=
+	 * 4) { aux ++; filhos.add(new FilhoVO(aux, "Servico 0" + aux.toString(),
+	 * aux.intValue(), "GRUPO", 10, "m3")); } aux = 0L; while (aux <= 4) { aux ++;
+	 * filhos.add(new FilhoVO(aux, "Grupo 0" + aux.toString(), aux.intValue(),
+	 * "SERVICO", null, null)); }
+	 * 
+	 * GrupoDTO grupo = new GrupoDTO(1L, "Grupo 01", filhos); return new
+	 * ResponseEntity<GrupoDTO>(grupo, HttpStatus.OK);
+	 * 
+	 * }
+	 */
+	
+	@GetMapping(path = {"/sql/memoria/{cdTabela}"})
+	public ResponseEntity<MemoriaDTO> getSqlMem(@PathVariable Integer cdTabela) {
+		log.info("ConsultaGruposResource: iniciando processamento getSqlMem()");
 		
-		Long aux = 0L;
-		List<FilhoDTO> filhos = new ArrayList<FilhoDTO>();
-		while (aux <= 8) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Grupo 0" + aux.toString(), aux.intValue(), "GRUPO", null, null));
+		List<MemoriaVO> memoriasEGrupos = memoriaCalculoService.getGrupoMemoriaSql(cdTabela);
+		List<FilhoVO> filhos = new ArrayList<FilhoVO>();
+		
+		for (MemoriaVO memoria : memoriasEGrupos) {
+			filhos.add(new FilhoVO(memoria.getCdgrupomemoria(), memoria.getDegrupomemoria(), memoria.getCdordem(), memoria.getTptipo() ,null, null));
 		}
 		
-		MemoriaDTO memoria = new MemoriaDTO(1L, 5400001L, "Orcamento 5400 versao 001", filhos);
-		return new ResponseEntity<MemoriaDTO>(memoria, HttpStatus.OK);
+		MemoriaDTO memoriaDto = new MemoriaDTO(
+								memoriasEGrupos.get(0).getCdmemoriacalculo(),
+								memoriasEGrupos.get(0).getCdtabela(),
+								memoriasEGrupos.get(0).getDememoria(),
+								filhos);
+		
+		log.info("ConsultaGruposResource: finalizando processamento getSqlMem()");
+		return new ResponseEntity<MemoriaDTO>(memoriaDto, HttpStatus.OK);
 		
 	}
 	
-	@GetMapping(path = {"/mock/grupo/{cdGrupoMemoria}"})
-	public ResponseEntity<GrupoDTO> getMockGrupo(@PathVariable Integer cdGrupoMemoria) {
+	@GetMapping(path = {"/sql/grupo/{cdMemoriaCalculo}/{cdGrupoMemoria}"})
+	public ResponseEntity<List<FilhoVO>> getSqlGrupo(@PathVariable Long cdMemoriaCalculo, @PathVariable Long cdGrupoMemoria) {
+		log.info("ConsultaGruposResource: iniciando processamento getSqlGrupo()");
 		
-		Long aux = 0L;
-		List<FilhoDTO> filhos = new ArrayList<FilhoDTO>();
-		while (aux <= 4) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Servico 0" + aux.toString(), aux.intValue(), "GRUPO", 10, "m3"));
-		}
-		aux = 0L;
-		while (aux <= 4) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Grupo 0" + aux.toString(), aux.intValue(), "SERVICO", null, null));
-		}
-		
-		GrupoDTO grupo = new GrupoDTO(1L, "Grupo 01", filhos);
-		return new ResponseEntity<GrupoDTO>(grupo, HttpStatus.OK);
-		
-	}
-	
-	@GetMapping(path = {"/sql/memoria/{cdMemoriaCalculo}"})
-	public ResponseEntity<MemoriaDTO> getSqlMem(@PathVariable Integer cdMemoriaCalculo) {
-		
-		List<MemoriaVO> memoriasEGrupos = memoriaCalculoService.getGrupoMemoriaSql(cdMemoriaCalculo);
-		
-		Long aux = 0L;
-		List<FilhoDTO> filhos = new ArrayList<FilhoDTO>();
-		while (aux <= 8) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Grupo 0" + aux.toString(), aux.intValue(), "GRUPO", null, null));
-		}
-		
-		MemoriaDTO memoria = new MemoriaDTO(1L, 5400001L, "Orcamento 5400 versao 001", filhos);
-		return new ResponseEntity<MemoriaDTO>(memoria, HttpStatus.OK);
-		
-	}
-	
-	@GetMapping(path = {"/sql/grupo/{cdGrupoMemoria}"})
-	public ResponseEntity<GrupoDTO> getSqlGrupo(@PathVariable Integer cdGrupoMemoria) {
-		
-		Long aux = 0L;
-		List<FilhoDTO> filhos = new ArrayList<FilhoDTO>();
-		while (aux <= 4) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Servico 0" + aux.toString(), aux.intValue(), "GRUPO", 10, "m3"));
-		}
-		aux = 0L;
-		while (aux <= 4) {
-			aux ++; 
-			filhos.add(new FilhoDTO(aux, "Grupo 0" + aux.toString(), aux.intValue(), "SERVICO", null, null));
-		}
-		
-		GrupoDTO grupo = new GrupoDTO(1L, "Grupo 01", filhos);
-		return new ResponseEntity<GrupoDTO>(grupo, HttpStatus.OK);
+		List<FilhoVO> filhos = memoriaCalculoService.getSubGrupoServicoSql(cdMemoriaCalculo, cdGrupoMemoria);
+				
+		log.info("ConsultaGruposResource: finalizando processamento getSqlGrupo()");
+		return new ResponseEntity<List<FilhoVO>>(filhos, HttpStatus.OK);
 		
 	}
 }

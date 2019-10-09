@@ -5,10 +5,12 @@ import java.io.Serializable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Entity @Data
-public class ConsultaMemoriaDTO implements Serializable{
+@Entity @Data @NoArgsConstructor @AllArgsConstructor
+public class FilhoVO implements Serializable{
 		
 	private static final long serialVersionUID = 5653573443159688609L;
 
@@ -19,4 +21,5 @@ public class ConsultaMemoriaDTO implements Serializable{
 	private String tipo;
 	private Integer quantidade;
 	private String unidade;
+
 }
